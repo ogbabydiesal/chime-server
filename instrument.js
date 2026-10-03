@@ -4,10 +4,14 @@ let feedbackSlider = document.getElementById('feedback');
 let context;
 let delay;
 let el;
-let videoEl;
-let buttonEl;
+let videoEl = document.getElementById('chime-vid');
+videoEl.preservesPitch = false;
+let videoDiv = document.getElementById('videoDiv');
+let buttonEl = document.getElementById('buttonText');
 let windText = [''];
 let vFiles = ['video/chime.mov_1.mp4','video/chime.mov_2.mp4','video/chime.mov_3.mp4','video/chime.mov_4.mp4','video/chime.mov_5.mp4','video/chime.mov_6.mp4','video/chime.mov_7.mp4','video/chime.mov_8.mp4','video/chime.mov_9.mp4','video/chime.mov_10.mp4','video/chime.mov_11.mp4','video/chime.mov_12.mp4','video/chime2.mov_1.mp4','video/chime2.mov_2.mp4','video/chime2.mov_3.mp4','video/chime2.mov_4.mp4','video/chime2.mov_5.mp4','video/chime2.mov_6.mp4','video/chime2.mov_7.mp4','video/chime2.mov_8.mp4','video/chime2.mov_9.mp4','video/chime2.mov_10.mp4','video/chime2.mov_11.mp4'];
+
+
 
 function getRandomInt(max) {
     return Math.floor(Math.random() * max);
@@ -20,9 +24,6 @@ const max = window.innerWidth - 420;
 const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
 
 function chime() {
-    videoEl = document.getElementById('chime-vid');
-    videoDiv = document.getElementById('videoDiv');
-    buttonEl = document.getElementById('buttonText');
     videoDiv.style.left = clamp((Math.random() * window.innerWidth), min, max) +'px';
     videoDiv.style.top = (Math.random() * window.innerHeight - 90) +'px';
     buttonEl.innerHTML = windText[getRandomInt(windText.length)];
@@ -88,7 +89,6 @@ function updateSpeed(value) {
 
 function updateTimeStretch(value) {
     videoEl.preservesPitch = value;
-    console.log('Time stretch: ' + value);
 }
 
 function keyPressed() {
