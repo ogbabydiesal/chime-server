@@ -1,104 +1,27 @@
+<!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" type="text/css" href="/style.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
     <script type="text/javascript" src="https://cdn.cycling74.com/rnbo/1.1.0/rnbo.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const { createDevice } = RNBO;
-      let context;
-      let socket = io();
-      let el;
-      let videoEl;
-      let buttonEl;
-      let windText = ['a wind', 'a cold chill', 'whispers', 'listen'];
-      let vFiles = ['video/chime.mov_1.mp4','video/chime.mov_2.mp4','video/chime.mov_3.mp4','video/chime.mov_4.mp4','video/chime.mov_5.mp4','video/chime.mov_6.mp4','video/chime.mov_7.mp4','video/chime.mov_8.mp4','video/chime.mov_9.mp4','video/chime.mov_10.mp4','video/chime.mov_11.mp4','video/chime.mov_12.mp4','video/chime2.mov_1.mp4','video/chime2.mov_2.mp4','video/chime2.mov_3.mp4','video/chime2.mov_4.mp4','video/chime2.mov_5.mp4','video/chime2.mov_6.mp4','video/chime2.mov_7.mp4','video/chime2.mov_8.mp4','video/chime2.mov_9.mp4','video/chime2.mov_10.mp4','video/chime2.mov_11.mp4'];
-      
-      function getRandomInt(max) {
-        return Math.floor(Math.random() * max);
-      }
-
-      const min = 0;
-      const max = window.innerWidth - 420;
-
-      // Clamp number between two values with the following line:
-      const clamp = (num, min, max) => Math.min(Math.max(num, min), max);
-
-      socket.on('time', (timeString) => {
-        el = document.getElementById('server-time');
-        el.innerHTML = 'Server time: ' + timeString;
-      });
-
-      socket.on('response', (controller) => {
-        el = document.getElementById('gust-state');
-        el.innerHTML = 'a presence was detected at ' +new Date().toTimeString();
-        farocki();
-      });
-
-      function farocki() {
-        videoEl = document.getElementById('lumi');
-        buttonEl = document.getElementById('buttonText');
-        videoEl.style.left = clamp((Math.random() * window.innerWidth), min, max) +'px';
-        videoEl.style.top = (Math.random() * window.innerHeight - 90) +'px';
-        buttonEl.innerHTML = windText[getRandomInt(windText.length)];
-        videoEl.src =  vFiles[getRandomInt(vFiles.length)];
-        videoEl.playbackRate = Math.random();
-        videoEl.play();
-        //const source = context.createMediaElementSource(videoEl);    
-      }
-
-      function gust(){
-        socket.emit("controller", "gust");
-        //videoEl = document.getElementById('lumi');
-        videoEl.muted = false;
-        context.resume();
-      }
-
-      function stop(){
-        videoEl = document.getElementById('lumi');
-        videoEl.pause();
-        videoEl.src=null;
-      }
-
-      async function setup() {
-          const WAContext = window.AudioContext || window.webkitAudioContext;
-          context = new WAContext();
-          // Create gain node and connect it to audio output
-          const outputNode = context.createGain();
-          outputNode.connect(context.destination);
-          
-          // Fetch the exported patchers
-          let response = await fetch("rnbo.filterdelay.json");
-          const delayPatcher = await response.json();
-          response = await fetch("rnbo.platereverb.json");
-          const reverbPatcher = await response.json();
-        
-          // Create the devices
-          const delayDevice = await createDevice({ context, patcher: delayPatcher });
-          const reverbDevice = await createDevice({ context, patcher: reverbPatcher });
-          videoEl = document.getElementById('lumi');
-          const source = context.createMediaElementSource(videoEl);
-          // Connect the devices in series
-          source.connect(delayDevice.node);
-          delayDevice.node.connect(reverbDevice.node);
-          reverbDevice.node.connect(outputNode);
-      }
-
-      setup();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@latest/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5.sound@latest/dist/p5.sound.min.js"></script>
+    <script src="instrument.js"></script>
   </head>
   <body>
     <div class="controls">
-        <h1>Gepetto's Ghost</h1>
-        <p>a multi-user cyber haunting</p>
-        <p>click the button below to cross the threshold</p>
-        </br>
-        <button id = "buttonText" onclick="gust()">a wind</button>
-        </br>
-        </br>
-        <button id = "buttonStop" onclick="stop()">exorcist</button>
-        </br>
-        </br>
-        <p id="gust-state">the ghost state</p> 
-        <video width = "420" autoplay muted loop playsinline id="lumi" ></video>        
+      </br>
+      <button id = "buttonText" onclick="gust()" width="300px"></button>
+      </br>
+      </br>
+      <button id = "buttonStop" onclick="stop()" width="100px"></button>
+      </br>
+      </br>
+      <div id="videoDiv">
+        <video width = "420" autoplay muted loop playsinline id="chime-vid" ></video>
+      </div>
+      <input id="delayTime" type="range" min="0.01" max="1.00" step="0.01" oninput="updateDelayTime(this.value)">
+      <input id="feedback" type="range" min="0.01" max="0.99" step="0.01" oninput="updateFeedback(this.value)">
+      <input id="speed" type="range" min="0.1" max="2.0" step="0.01" oninput="updateSpeed(this.value)">
+      <input type="checkbox" id="timeStretch" oninput="updateTimeStretch(this.checked)">
   </body>
 </html>
